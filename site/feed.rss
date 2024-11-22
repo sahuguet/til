@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/"><channel><title>TILs</title><link>https://sahuguet.github.io/til/</link><description></description><item><title>nginx and sudo</title><category>nginx</category><pubDate>2020-0723</pubDate><content:encoded><![CDATA[<h1>Fun with nginx and sudo</h1>
+<p>I am building a handful of static websites these days. I like github pages, but sometimes Jekyll is not my go-to solution.</p>
+<p>My current setup is based on Jinja2 templates and a Python script that generates the site locally, served by nginx.</p>
+<p>Whenever I make a change, I simply need to get the latest version from the repository and run the script:</p>
+<pre class="syntax-highlighting"><code><span class="text plain">git pull &amp;&amp; python build_site.py
+</span></code></pre>
+<p>This usally involves doing <code>ssh</code> to a remote machine and run the script (I should have bundled both into a single <code>ssh</code> command, I know).
+The setup is fine for me, but not for my teammates. Whenever they make a change, they need me to push it live. This is not ideal.
+Also:</p>
+<ul>
+<li>most of them are not very comfortable with <code>ssh</code></li>
+<li><code>ssh</code> requires to share some keys</li>
+<li>etc.</li>
+</ul>
+<p>The solution I am presenting lets anyone force a site refresh (i.e. running the <code>git pull &amp;&amp; python build_site.py</code> command) by invoking an endpoint over HTTP.</p>
+<p>Some important details:</p>
+<ul>
+<li>The content of the website is owned by user <code>nyc-response-lab</code>.</li>
+<li>The github repo is public (but private would work as well using deployed keys).</li>
+<li>nginx is running as user <code>www-data</code>.</li>
+</ul>
+<p>First, you need to create a script that does what you want.
+In our case, this is just freshing the repo and building the site</p>
+<pre class="syntax-highlighting"><code><span class="text plain"># Content of file `update_site.sh`
+git pull &amp;&amp; python build_site.py
+</span></code></pre>
+<p>Second, you need to make sure that user <code>www-data</code> can run this script as user <code>nyc-response-lab</code>. You can achieve that using <code>sudo</code> and adding the following line in the <code>/etc/sudoers</code> file:</p>
+<pre class="syntax-highlighting"><code><span class="text plain">www-data ALL=(ALL:ALL) NOPASSWD:/bin/bash /home/nyc-response-lab/update_site.sh
+</span></code></pre>
+<p>Third and last, you need to create an end-point that will execute the command. I am using Lua to get the job done.</p>
+<pre class="syntax-highlighting"><code><span class="text plain">  location /__end_point_to_use_to_refresh_the_content__ {
+     default_type &#39;text/plain&#39;;
+     content_by_lua_block {
+       local command = &quot;/usr/bin/sudo -u nyc-response-lab /bin/bash /home/nyc-response-lab/update_site.sh&quot;
+       local handle = io.popen(command)
+       local result = handle:read(&quot;*a&quot;)
+       handle:close()
+       ngx.say(&#39;Refreshing Content ...&#39;)
+       ngx.say(result)
+    }
+   }
+</span></code></pre>
+<p><code>sudo -u nyc-response-lab</code> lets user <code>www-data</code> impersonate user <code>nyc-response-lab</code>.
+Because of the entry in the <code>/etc/sudoers</code> file, user <code>www-data</code> has the right to run script <code>/home/nyc-response-lab/update_site.sh</code></p>
+<p>When my teammates point their browser to <code>http://responselabnyc.com/</code>, the script gets executed and they get back something like:</p>
+<pre class="syntax-highlighting"><code><span class="text plain">Refreshing Content ...
+Success
+</span></code></pre>
+<p>Et voilà.</p>
+<p>If you want to make it even more secure, you can protect the endpoint with a password.</p>
+]]></content:encoded></item></channel></rss>
