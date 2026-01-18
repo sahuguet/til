@@ -1,0 +1,50 @@
+---
+import { getCollection } from 'astro:content';
+import Layout from '../layouts/Layout.astro';
+
+export async function getStaticPaths() {
+  const tilEntries = await getCollection('tils', ({ data }) => {
+    return data.publish === true;
+  });
+
+  return tilEntries.map((entry) => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+---
+
+<Layout title={entry.data.title}>
+  <article>
+    <header style="margin-bottom: 2rem;">
+      <h1 style="margin-bottom: 0.5rem;">{entry.data.title}</h1>
+      <time style="color: #666; font-size: 0.9rem;">
+        {entry.data.date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+      </time>
+      {entry.data.tags && entry.data.tags.length > 0 && (
+        <div style="margin-top: 0.5rem;">
+          {entry.data.tags.map((tag) => (
+            <span style="background: var(--color-code-bg); padding: 0.2rem 0.5rem; margin-right: 0.5rem; border-radius: 3px; font-size: 0.85rem;">
+              #{tag}
+            </span>
+          ))}
+        </div>
+      )}
+    </header>
+
+    <div class="content">
+      <Content />
+    </div>
+
+    <footer style="margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--color-border);">
+      <a href="/til/">&larr; Back to all TILs</a>
+    </footer>
+  </article>
+</Layout>

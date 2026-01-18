@@ -1,7 +1,8 @@
 ---
 title: nginx and sudo
 tags: [nginx]
-date: 2020-0723
+date: 2020-07-23
+publish: true
 ---
 
 # Fun with nginx and sudo

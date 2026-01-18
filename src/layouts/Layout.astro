@@ -1,0 +1,117 @@
+---
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Today I Learned - Short snippets of things I learn' } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="description" content={description} />
+    <meta name="viewport" content="width=device-width" />
+    <link rel="icon" type="image/svg+xml" href="/til/favicon.svg" />
+    <title>{title}</title>
+    <style>
+      :root {
+        --color-bg: #ffffff;
+        --color-text: #24292e;
+        --color-primary: #0366d6;
+        --color-border: #e1e4e8;
+        --color-code-bg: #f6f8fa;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --color-bg: #0d1117;
+          --color-text: #c9d1d9;
+          --color-primary: #58a6ff;
+          --color-border: #30363d;
+          --color-code-bg: #161b22;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        color: var(--color-text);
+        background: var(--color-bg);
+        margin: 0;
+        padding: 0;
+      }
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+      }
+
+      a {
+        color: var(--color-primary);
+        text-decoration: none;
+      }
+
+      a:hover {
+        text-decoration: underline;
+      }
+
+      code {
+        background: var(--color-code-bg);
+        padding: 0.2em 0.4em;
+        border-radius: 3px;
+        font-size: 85%;
+      }
+
+      pre {
+        background: var(--color-code-bg);
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+      }
+
+      pre code {
+        background: none;
+        padding: 0;
+      }
+
+      h1, h2, h3, h4, h5, h6 {
+        margin-top: 1.5em;
+        margin-bottom: 0.5em;
+      }
+
+      .header {
+        border-bottom: 1px solid var(--color-border);
+        padding-bottom: 1rem;
+        margin-bottom: 2rem;
+      }
+
+      .header h1 {
+        margin: 0;
+      }
+
+      .header nav {
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <header class="header">
+        <h1><a href="/til/">TIL</a></h1>
+        <nav>
+          <a href="/til/">Home</a>
+        </nav>
+      </header>
+      <main>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>
