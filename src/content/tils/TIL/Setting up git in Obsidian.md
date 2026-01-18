@@ -1,6 +1,6 @@
 ---
 title: Setting up git in Obsidian
-publish: "false"
+publish: "true"
 date: 2026-01-17
 ---
 ## master vs main
