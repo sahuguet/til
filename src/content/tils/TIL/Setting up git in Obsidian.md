@@ -1,4 +1,11 @@
----
+
+# Setting up git in Obsidian
+
+**What I learned:**
+
+**Why it matters:**
+
+**Example:**---
 title: Setting up git in Obsidian
 publish: "true"
 date: 2026-01-17
